@@ -9,7 +9,6 @@ export default function StockOverviewPage() {
 
     return (
     <div>
-      <h2>Stock Overview Page contains:</h2>
         <SymbolSearch/>
         <StockSelector/>
     </div>

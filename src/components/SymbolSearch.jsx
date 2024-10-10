@@ -6,13 +6,15 @@ import finnHub from "../api/FinnHub.js";
 export default function SymbolSearch() {
     const [search, setSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+    const {addSymbolToWatchList,removeSymbolFromWatchList} = useOutletContext();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await finnHub.get("/search", {
                     params: {
-                        q: search
+                        q: search,
+                        exchange: "US"
                     }
                 });
                 console.log(response);
@@ -42,6 +44,10 @@ export default function SymbolSearch() {
                             className="dropdown-item"
                             key={result.symbol}
                             value={result.symbol}
+                            onClick={() => {
+                                addSymbolToWatchList(result.symbol);
+                                setSearch("");
+                            }}
                         >
                             {result.description} ({result.symbol})
                         </li>
