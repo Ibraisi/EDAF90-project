@@ -6,7 +6,7 @@ import finnHub from "../api/FinnHub.js";
 export default function SymbolSearch() {
     const [search, setSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
-    const {addSymbolToWatchList,removeSymbolFromWatchList} = useOutletContext();
+    const {addSymbolToWatchList, removeSymbolFromWatchList} = useOutletContext();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,7 +26,7 @@ export default function SymbolSearch() {
         search.length > 1 ? fetchData() : setSearchResults([]);
     }, [search]);
 
-    const renderingDropdown = () =>{
+    const renderingDropdown = () => {
         const toShow = searchResults.length > 0 ? "show" : "";
         return (
             <ul

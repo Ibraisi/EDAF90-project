@@ -1,4 +1,4 @@
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import {useState,useEffect} from 'react';
 import FinnHub from "../api/FinnHub.js";
 import { BsCaretUpFill } from "react-icons/bs"
@@ -27,6 +27,7 @@ const addIcon = (value) =>{
 export default function StockSelector() {
     const { watchList } = useOutletContext();
     const[stockData, setStockData] = useState([]);
+    const navigate = useNavigate();
     useEffect(() => {
         // fetch stock data for each symbol in watchList
         // and save in the stockData state
@@ -54,8 +55,10 @@ export default function StockSelector() {
             }
         }
         fetchData();
-
     }, [watchList]);
+    const handleStockClick = (symbol) =>{
+        navigate(`/detail/${symbol}`);
+    }
     return (
         <div>
             <div>
@@ -75,7 +78,7 @@ export default function StockSelector() {
                     <tbody>
                     {stockData.map((stock) => {
                         return (
-                            <tr key={stock.symbol} className="table-row">
+                            <tr key={stock.symbol} className="table-row" onClick={() => handleStockClick(stock.symbol)}>
                                 <th scope="row">{stock.symbol}</th>
                                 <td>{stock.data.c}</td>
                                 <td className={changeColor(stock.data.d)}>{stock.data.d} {addIcon(stock.data.d)}</td>
