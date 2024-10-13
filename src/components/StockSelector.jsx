@@ -87,7 +87,7 @@ export default function StockSelector() {
                                 <td>{stock.data.l}</td>
                                 <td>{stock.data.o}</td>
                                 <td>{stock.data.pc}</td>
-                            </tr>
+                        </tr>
                         )
                     })}
                     </tbody>
