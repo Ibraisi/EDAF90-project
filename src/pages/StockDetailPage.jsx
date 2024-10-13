@@ -9,29 +9,27 @@ export default function StockDetailPage() {
 
     const multiplier = 1;
     const timespan = "day";
-    const from ="2024-09-30";
+    const from = "2024-09-30";
     const to = "2024-10-06";
-    useEffect(() =>{
-        const fetchData = async () =>{
-            try{
-                const response = await Polygon.get(`${symbol}/range/${multiplier}/${timespan}/${from}/${to}`,{
-
-                });
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await Polygon.get(`${symbol}/range/${multiplier}/${timespan}/${from}/${to}`, {});
                 console.log(response.data.results);
                 setStockData(response.data.results);
-            }catch (e){
+            } catch (e) {
                 console.log(e);
             }
         }
         fetchData();
 
-    },[symbol]);
+    }, [symbol]);
     return (
         <div>
             <h3>{`Stock detail page for the symbol ${symbol}`}</h3>
-            {stockData &&<StockChart
-                stockData ={stockData}
-                symbol = {symbol}
+            {stockData && <StockChart
+                stockData={stockData}
+                symbol={symbol}
             />
             }
         </div>

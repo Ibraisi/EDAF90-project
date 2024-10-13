@@ -1,37 +1,37 @@
 import Chart from "react-apexcharts";
+
 export default function StockChart({stockData, symbol}) {
-    console.log(`from StockChart ${JSON.stringify(stockData)} and the symbol is ${symbol}`);
+
     const options = {
-        title:{
+        title: {
             text: `Stock Chart for ${symbol}`,
             align: "center",
-            style:{
+            style: {
                 fontSize: "10px"
             }
         },
         chart: {
             id: "stock data",
-            animation:{
+            animation: {
                 speed: 1300
             }
         },
-        xaxis:{
-            categories: stockData.map((stock) =>{
+        xaxis: {
+            categories: stockData.map((stock) => {
 
                 return new Date(stock.t).toLocaleDateString();
             })
 
         }
     }
-    const data = stockData.map((stock) => stock.c);
+
     const series = [{
         name: symbol,
-        data: data
+        data: stockData.map((stock) => stock.c)
     }];
-    console.log(JSON.stringify(series));
+
     return (
         <div className='mt-5 p-4 bg-white'>
-
             <Chart
                 options={options}
                 series={series}
