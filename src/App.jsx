@@ -1,7 +1,8 @@
-import {useState} from 'react'
-
-import './App.css'
-import {Outlet} from "react-router-dom";
+import { useState } from 'react';
+import './App.css';
+import { Outlet } from "react-router-dom";
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 
 function App() {
     const [watchList, setWatchList] = useState(["GOOGL", "MSFT", "AMZN"]);
@@ -18,20 +19,22 @@ function App() {
     const removeSymbolFromWatchList = (symbol) => {
         setWatchList(watchList.filter((item) => item !== symbol));
     };
+
     return (
-        <main className="container">
-            <h1>StrategiTestaren</h1>
-            <Outlet
-                context={
-                    {
+        <div className="d-flex flex-column min-vh-100">
+            <Navbar />
+            <main className="container my-4" style={{ maxWidth: "1200px" }}>
+                <Outlet
+                    context={{
                         watchList,
                         addSymbolToWatchList,
                         removeSymbolFromWatchList
-                    }
-                }
-            />
-        </main>
-    )
+                    }}
+                />
+            </main>
+            <Footer />
+        </div>
+    );
 }
 
-export default App
+export default App;
