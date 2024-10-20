@@ -1,81 +1,111 @@
-import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Polygon from "../api/Polygon";
 import StockChart from "../components/StockChart.jsx";
 import StockForm from "../components/StockForm.jsx";
 
 export default function StockDetailPage() {
-    const { symbol } = useParams();
-    const [stockData, setStockData] = useState();
-    const [strategyData, setStrategyData] = useState();
+  const { symbol } = useParams();
+  const navigate = useNavigate();
+  const [stockData, setStockData] = useState(null);
+  const [strategyData, setStrategyData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-    const calculateSMA = (data, period) => {
-        const sma = [];
-        for (let i = period - 1; i < data.length; i++) {
-            const sum = data.slice(i - period + 1, i + 1).reduce((acc, val) => acc + val.c, 0);
-            sma.push({ x: data[i].t, y: sum / period });
-        }
-        return sma;
-    };
+  const calculateSMA = (data, period) => {
+    if (period <= 0 || data.length < period) return [];
+    return data.slice(period - 1).map((_, index) => {
+      const slice = data.slice(index, index + period);
+      const sum = slice.reduce((acc, val) => acc + val.c, 0);
+      return { x: new Date(data[index + period - 1].t), y: sum / period };
+    });
+  };
 
-    const calculateEMA = (data, period) => {
-        const k = 2 / (period + 1);
-        const ema = [{ x: data[0].t, y: data[0].c }];
-        for (let i = 1; i < data.length; i++) {
-            const newValue = data[i].c * k + ema[i - 1].y * (1 - k);
-            ema.push({ x: data[i].t, y: newValue });
-        }
-        return ema;
-    };
+  const calculateEMA = (data, period) => {
+    if (period <= 0 || data.length < period) return [];
+    const k = 2 / (period + 1);
+    const initialSMA = data.slice(0, period).reduce((acc, val) => acc + val.c, 0) / period;
+    return data.slice(period - 1).reduce((ema, value, i) => {
+      const newValue = i === 0 ? initialSMA : value.c * k + ema[i - 1].y * (1 - k);
+      ema.push({ x: new Date(value.t), y: newValue });
+      return ema;
+    }, []);
+  };
 
-    const fetchStockData = async (data) => {
-        const { multiplier, timespan, from, to, strategy, shortPeriod, longPeriod } = data;
-        try {
-            const response = await Polygon.get(`${symbol}/range/${multiplier}/${timespan}/${from}/${to}`, {});
-            setStockData(response.data.results);
+  const fetchStockData = async (formData) => {
+    const { multiplier, timespan, from, to, strategy, shortPeriod, longPeriod } = formData;
+    setError(null);
+    setLoading(true);
 
-            if (strategy !== "none") {
-                const shortTermData = strategy === "sma"
-                    ? calculateSMA(response.data.results, shortPeriod)
-                    : calculateEMA(response.data.results, shortPeriod);
-                const longTermData = strategy === "sma"
-                    ? calculateSMA(response.data.results, longPeriod)
-                    : calculateEMA(response.data.results, longPeriod);
-                setStrategyData({ shortTerm: shortTermData, longTerm: longTermData });
-            } else {
-                setStrategyData(null);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
+    try {
+      const response = await Polygon.get(`/${symbol}/range/${multiplier}/${timespan}/${from}/${to}`);
+      const results = response.data.results;
 
-    return (
-        <div className="container">
-            <h3 className="my-4">{`Stock Details for ${symbol}`}</h3>
+      if (!results || results.length === 0) {
+        throw new Error("No data available for the selected date range.");
+      }
 
-            <div className="alert alert-info">
-                <h4 className="alert-heading">Welcome to the Stock Detail Page!</h4>
-                <p>This page allows you to view historical stock data for {symbol} and apply basic trading strategies.</p>
-                <hr />
-                <p className="mb-0">Use the form below to customize your view:</p>
-                <ul>
-                    <li>Set the date range and data aggregation level (daily, weekly, or monthly).</li>
-                    <li>Choose a trading strategy (Simple Moving Average or Exponential Moving Average) to overlay on the chart.</li>
-                    <li>Specify short-term and long-term periods for the selected strategy.</li>
-                </ul>
-                <p>After submitting the form, the chart will update to display the stock price and selected strategy indicators.</p>
-            </div>
+      const formattedResults = results.map(item => ({
+        ...item,
+        t: new Date(item.t).toISOString(),
+      }));
 
-            <StockForm onSubmit={fetchStockData} />
+      setStockData(formattedResults);
 
-            {stockData ? (
-                <div className="my-4">
-                    <StockChart stockData={stockData} strategyData={strategyData} symbol={symbol} width="100%" height="500px" />
-                </div>
-            ) : (
-                <p className="alert alert-warning">No data available. Please submit the form to see the stock data.</p>
-            )}
+      if (strategy === "sma" || strategy === "ema") {
+        const calculationFunction = strategy === "sma" ? calculateSMA : calculateEMA;
+        const shortTermData = calculationFunction(formattedResults, parseInt(shortPeriod));
+        const longTermData = calculationFunction(formattedResults, parseInt(longPeriod));
+        setStrategyData({ shortTerm: shortTermData, longTerm: longTermData });
+      } else {
+        setStrategyData(null);
+      }
+    } catch (e) {
+      console.error("Error fetching stock data:", e);
+      setError(e.message || "An error occurred while fetching stock data.");
+      setStockData(null);
+      setStrategyData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStockData({
+      multiplier: 1,
+      timespan: "day",
+      from: "2023-01-01",
+      to: "2023-12-31",
+      strategy: "none",
+      shortPeriod: 10,
+      longPeriod: 20
+    });
+  }, [symbol]);
+
+  return (
+    <div className="container">
+      <h3 className="my-4">{`Stock Details for ${symbol}`}</h3>
+      <button onClick={() => navigate('/')} className="btn btn-secondary mb-3">Back to Home</button>
+
+      <StockForm onSubmit={fetchStockData} />
+
+      {loading && <div className="alert alert-info">Loading data...</div>}
+
+      {error && (
+        <div className="alert alert-danger my-4">
+          {error}
         </div>
-    );
+      )}
+
+      {stockData && (
+        <div className="my-4">
+          <StockChart
+            stockData={stockData}
+            strategyData={strategyData}
+            symbol={symbol}
+          />
+        </div>
+      )}
+    </div>
+  );
 }
