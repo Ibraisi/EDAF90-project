@@ -24,7 +24,7 @@ const addIcon = (value) => {
 }
 
 export default function StockSelector() {
-    const { watchList } = useOutletContext();
+    const { watchList, removeSymbolFromWatchList } = useOutletContext();
     const [stockData, setStockData] = useState([]);
     const navigate = useNavigate();
 
@@ -87,12 +87,20 @@ export default function StockSelector() {
                                 <td>{stock.data.o}</td>
                                 <td>{stock.data.pc}</td>
                                 <td>
-                                    <button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={() => handleStockClick(stock.symbol)}
-                                    >
-                                        View Details
-                                    </button>
+                                    <div className="d-flex align-items-stretch">
+                                        <button
+                                            className="btn btn-primary btn-sm m-1"
+                                            onClick={() => handleStockClick(stock.symbol)}
+                                        >
+                                            View Details
+                                        </button>
+                                        <button
+                                            className="btn btn-danger btn-sm m-1"
+                                            onClick={() => removeSymbolFromWatchList(stock.symbol)}
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         )
