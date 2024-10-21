@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
 export default function StockForm({ onSubmit }) {
     const { register, handleSubmit, formState: { errors }, watch } = useForm({
@@ -55,6 +56,9 @@ export default function StockForm({ onSubmit }) {
                         <option value="ema">Exponential Moving Average (EMA)</option>
                     </select>
                     {errors.strategy && <div className="invalid-feedback">{errors.strategy.message}</div>}
+                    <small className="form-text text-muted">
+                        Learn more about trading strategies on our <Link to="/strategies">Strategies page</Link>.
+                    </small>
                 </div>
             </div>
 
@@ -93,6 +97,9 @@ export default function StockForm({ onSubmit }) {
                             {...register("shortPeriod", { required: "Short period is required", min: 1 })}
                         />
                         {errors.shortPeriod && <div className="invalid-feedback">{errors.shortPeriod.message}</div>}
+                        <small className="form-text text-muted">
+                            Typically a smaller number, e.g., 10 days for SMA/EMA.
+                        </small>
                     </div>
 
                     <div className="col-md-6 mb-3">
@@ -104,6 +111,9 @@ export default function StockForm({ onSubmit }) {
                             {...register("longPeriod", { required: "Long period is required", min: 1 })}
                         />
                         {errors.longPeriod && <div className="invalid-feedback">{errors.longPeriod.message}</div>}
+                        <small className="form-text text-muted">
+                            Typically a larger number, e.g., 20 or 50 days for SMA/EMA.
+                        </small>
                     </div>
                 </div>
             )}
