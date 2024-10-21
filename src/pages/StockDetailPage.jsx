@@ -83,7 +83,7 @@ export default function StockDetailPage() {
   }, [symbol]);
 
   return (
-    <div className="container">
+    <div className="container mt-5">
       <h3 className="my-4">{`Stock Details for ${symbol}`}</h3>
       <button onClick={() => navigate('/')} className="btn btn-secondary mb-3">Back to Home</button>
 
